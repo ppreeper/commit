@@ -221,18 +221,33 @@ func main() {
 	description := strings.Join([]string{longDescription, breakChange, closeIssue}, "\n\n")
 	description = strings.TrimSpace(description)
 
-	cmd := "git"
-	cmdArgs := []string{}
-	if description != "" {
-		cmdArgs = []string{"commit", "-m", summary, "-m", description}
-		// fmt.Println("git commit -m " + `"` + summary + `"` + " -m " + `"` + description + `"`)
-	} else {
-		cmdArgs = []string{"commit", "-m", summary}
-		// fmt.Println("git commit -m " + `"` + summary + `"`)
-	}
-	out, err := exec.Command(cmd, cmdArgs...).Output()
+	var commitNow bool
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title("commit now").
+				Value(&commitNow),
+		),
+	)
+	err := form.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(out))
+
+	if commitNow {
+		cmd := "git"
+		cmdArgs := []string{}
+		if description != "" {
+			cmdArgs = []string{"commit", "-m", summary, "-m", description}
+			// fmt.Println("git commit -m " + `"` + summary + `"` + " -m " + `"` + description + `"`)
+		} else {
+			cmdArgs = []string{"commit", "-m", summary}
+			// fmt.Println("git commit -m " + `"` + summary + `"`)
+		}
+		out, err := exec.Command(cmd, cmdArgs...).Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(out))
+	}
 }
